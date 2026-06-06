@@ -177,7 +177,7 @@ KNOWLEDGE = {
 COMMON_PATTERNS = {
     'women_help': ['women helpline', 'women help', '1091', 'ladies helpline', 'women emergency'],
     'emergency': ['emergency', 'ambulance', 'police', 'urgent'],
-    'event': ['event', 'schedule', 'program', 'aarti', 'snan', 'time', 'timing'],
+    'events': ['event', 'schedule', 'program', 'aarti', 'snan', 'time', 'timing'],
     'accommodation': ['stay', 'hotel', 'accommodation', 'camp', 'sleep', 'room'],
     'navigation': ['where', 'direction', 'how to reach', 'route', 'gate'],
     'services': ['service', 'medical', 'charger', 'food', 'lost'],
@@ -243,10 +243,9 @@ def choose_answer(message: str, language: str) -> str:
                 return answer
 
     return (
-        'Welcome to the Mahakumbh Multilingual Pilgrim Assistant. '
-        'I can help with navigation, event schedules, emergency support, accommodation guidance, '
-        'local services, FAQs, and simple phrase translations. '
-        'Try asking: "Where is the main gate?", "Translate thank you to Hindi", or "What are the event timings?"'
+        'Sorry, I did not understand that question. '
+        'Please ask about navigation, event timings, emergency support, accommodation, local services, or translation. '
+        'For example: "Where is the main gate?", "Translate thank you to Hindi", or "What are the event timings?"'
     )
 
 
