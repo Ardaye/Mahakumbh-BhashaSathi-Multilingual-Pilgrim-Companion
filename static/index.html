@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mahakumbh Pilgrim Assistant</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header>
+      <h1>Mahakumbh Pilgrim Assistant</h1>
+      <p>Multilingual guidance for navigation, events, emergency support, accommodation, services, and translations.</p>
+    </header>
+
+    <div class="controls">
+      <label>
+        Language:
+        <select id="language-select">
+          <option>English</option>
+          <option>Hindi</option>
+          <option>Bengali</option>
+          <option>Gujarati</option>
+          <option>Marathi</option>
+          <option>Punjabi</option>
+          <option>Tamil</option>
+          <option>Telugu</option>
+          <option>Malayalam</option>
+          <option>Kannada</option>
+          <option>French</option>
+          <option>Japanese</option>
+          <option>German</option>
+        </select>
+      </label>
+      <button id="btn-help">Emergency Help</button>
+      <button id="btn-events">Event Schedule</button>
+      <button id="btn-accommodation">Accommodation Guidance</button>
+      <button id="btn-translate">Translate Phrase</button>
+    </div>
+
+    <div class="chat-window" id="chat-window"></div>
+
+    <div class="prompt-panel">
+      <textarea id="message-input" placeholder="Ask the assistant or type a phrase to translate..."></textarea>
+      <button id="send-button">Send</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
