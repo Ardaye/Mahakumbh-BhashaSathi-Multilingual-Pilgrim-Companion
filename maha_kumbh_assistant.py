@@ -8,7 +8,10 @@ HOST = '127.0.0.1'
 PORT = 8080
 PROJECT_DIR = Path(__file__).resolve().parent
 STATIC_DIR = PROJECT_DIR / 'static'
-TRANSLATION_PATTERN = re.compile(r'translate\s+"?(?P<phrase>.+?)"?\s+to\s+(?P<language>[a-zA-Z]+)', re.I)
+TRANSLATION_PATTERN = re.compile(
+    r'translate\s+"?(?P<phrase>.+?)"?\s+(?:from\s+(?P<source>[a-zA-Z]+)\s+)?(?:to|into)\s+(?P<language>[a-zA-Z]+)',
+    re.I,
+)
 
 PHRASEBOOK = {
     'English': {
@@ -191,39 +194,78 @@ AVAILABLE_LANGUAGES = [
 ]
 
 
-def parse_translation_request(query: str) -> tuple[str, str] | None:
+def parse_translation_request(query: str) -> tuple[str, str | None, str] | None:
     match = TRANSLATION_PATTERN.search(query)
     if not match:
         return None
     phrase = match.group('phrase').strip().lower()
+    source = match.group('source')
     target = match.group('language').strip().title()
-    return phrase, target
+    return phrase, source, target
+
+
+def detect_source_language(phrase: str) -> str | None:
+    phrase = phrase.lower().strip()
+    for language, phrases in PHRASEBOOK.items():
+        # Exact key or value match
+        if phrase in phrases:
+            return language
+        if phrase in (value.lower() for value in phrases.values()):
+            return language
+    if phrase.startswith('where is'):
+        return 'English'
+    return None
+
+
+def find_translation_key(phrase: str, source_language: str) -> str | None:
+    phrase = phrase.lower().strip()
+    if phrase in PHRASEBOOK[source_language]:
+        return phrase
+    for key, value in PHRASEBOOK[source_language].items():
+        if phrase == value.lower():
+            return key
+    return None
 
 
 def build_translation(query: str, target_language: str) -> str:
     parsed = parse_translation_request(query)
     if parsed is not None:
-        phrase, raw_target = parsed
+        phrase, raw_source, raw_target = parsed
         if raw_target not in AVAILABLE_LANGUAGES:
             return f'Sorry, translation into {raw_target} is not available yet.'
         target_language = raw_target
+        source_language = normalize_language(raw_source) if raw_source else None
     else:
         phrase = query.lower().strip()
+        source_language = None
 
     if target_language not in PHRASEBOOK:
         return f'Sorry, translation into {target_language} is not available yet.'
 
+    if source_language and source_language not in PHRASEBOOK:
+        source_language = None
+
+    if source_language is None:
+        source_language = detect_source_language(phrase)
+
     if 'where is' in phrase:
-        place = phrase.split('where is')[-1].strip(' ?') or 'place'
+        place = phrase.split('where is', 1)[-1].strip(' ?') or 'place'
         template = PHRASEBOOK[target_language].get('where is')
         return template.format(place=place)
 
-    for key in ['hello', 'thank you', 'please', 'good morning', 'goodbye', 'help', 'emergency']:
-        if key in phrase:
+    if source_language:
+        key = find_translation_key(phrase, source_language)
+        if key:
+            return PHRASEBOOK[target_language][key]
+
+    for language in AVAILABLE_LANGUAGES:
+        key = find_translation_key(phrase, language)
+        if key:
             return PHRASEBOOK[target_language][key]
 
     return (
-        'I can translate a few useful phrases. Try: "hello", "thank you", "please", "where is the medical camp", or "good morning".'
+        'I can translate common pilgrimage phrases between supported languages. '
+        'Try: "Translate hello to Hindi", "Translate where is the medical camp to Marathi", or "Translate नमस्ते from Hindi to English."'
     )
 
 
@@ -231,6 +273,9 @@ def choose_answer(message: str, language: str) -> str:
     text = message.lower().strip()
     if not text:
         return 'Please type a question or choose one of the example prompts to continue.'
+
+    if 'translate' in text:
+        return build_translation(text, language)
 
     for topic, keywords in COMMON_PATTERNS.items():
         if any(k in text for k in keywords):
