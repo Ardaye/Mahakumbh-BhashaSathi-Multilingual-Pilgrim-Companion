@@ -23,6 +23,14 @@ class PilgrimAssistantTests(unittest.TestCase):
         result = build_translation('Translate hello to Marathi', 'English')
         self.assertEqual(result, 'नमस्कार')
 
+    def test_translate_phrase_from_hindi_to_english(self):
+        result = build_translation('Translate नमस्ते from Hindi to English', 'English')
+        self.assertEqual(result, 'Hello')
+
+    def test_translate_where_is_medical_camp_to_marathi(self):
+        result = choose_answer('Translate where is the medical camp to Marathi', 'English')
+        self.assertEqual(result, 'the medical camp कुठे आहे?')
+
     def test_translate_phrase_missing_language(self):
         result = build_translation('Translate hello to Spanish', 'English')
         self.assertTrue('not available' in result)
